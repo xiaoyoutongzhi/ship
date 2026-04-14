@@ -62,8 +62,8 @@ const emit = defineEmits<{
 const m = YARD_GRID_METRICS;
 const strideX = cellStrideX(m);
 const strideY = cellStrideY(m);
-/** 箱块与格槽四边的留白（与 drawBayCellGrid 中 CELL_VISUAL_INSET 视觉一致） */
-const pad = 6;
+/** 箱块比格槽小 2px：四边各留 1px，避免视觉过满 */
+const pad = 1;
 const boxW = m.cellWidth - pad * 2;
 const boxH = m.cellHeight - pad * 2;
 
@@ -184,10 +184,27 @@ function shortNo(no: string) {
   return `${no.slice(0, 4)}…${no.slice(-4)}`;
 }
 
+/** 箱号拆分为两行：字母前缀 + 数字后缀 */
+function containerNoParts(no: string) {
+  const cleaned = no.replace(/\s+/g, "");
+  const matched = cleaned.match(/^([A-Za-z]{4})(\d+)$/);
+  if (matched) {
+    return { owner: matched[1].toUpperCase(), serial: matched[2] };
+  }
+  const compact = shortNo(cleaned);
+  return { owner: compact, serial: "" };
+}
+
+/** 作业顺序号角标宽度：按位数自适应，避免文字挤压 */
+function workSeqBadgeWidth(workSeq: string | number) {
+  const len = String(workSeq).length;
+  return Math.min(26, Math.max(16, 10 + len * 5));
+}
+
 /** 贝脚「药丸」背景宽度：随列宽变化并在区间内夹紧 */
 function bayFooterPillWidth(stackNum: number) {
   const gw = gridBodyWidth(stackNum, m);
-  return Math.min(132, Math.max(48, gw - 8));
+  return Math.min(88, Math.max(48, gw - 8));
 }
 </script>
 
@@ -288,6 +305,7 @@ function bayFooterPillWidth(stackNum: number) {
           }"
         />
 
+        <!-- 底部街区&贝号文字背景 -->
         <Rect
           :config="{
             x:
@@ -305,11 +323,12 @@ function bayFooterPillWidth(stackNum: number) {
           }"
         />
 
+        <!-- 底部街区&贝号文字 -->
         <Text
           :config="{
             x: m.labelColWidth,
             y:
-              m.stackHeaderHeight + gridBodyHeight(localBlock.tier_num, m) + 12,
+              m.stackHeaderHeight + gridBodyHeight(localBlock.tier_num, m) + 14,
             width: gridBodyWidth(localBlock.stack_num, m),
             align: 'center',
             text: `${localBlock.yard_lane_no}-${String(bayNo).padStart(2, '0')}`,
@@ -320,12 +339,13 @@ function bayFooterPillWidth(stackNum: number) {
           }"
         />
 
+        <!-- 底部吊桥文字 -->
         <Text
           :config="{
-            x: 0,
+            x: m.labelColWidth,
             y:
               m.stackHeaderHeight + gridBodyHeight(localBlock.tier_num, m) + 38,
-            width: bayInnerWidth(localBlock.stack_num, m),
+            width: gridBodyWidth(localBlock.stack_num, m),
             align: 'center',
             text: mockBayStatus(bayNo),
             fontSize: 10,
@@ -335,6 +355,7 @@ function bayFooterPillWidth(stackNum: number) {
         />
       </Group>
     </Layer>
+
     <!-- 绘制箱子 -->
     <Layer>
       <Group
@@ -343,11 +364,12 @@ function bayFooterPillWidth(stackNum: number) {
         :config="{
           x: containerPosition(c).x,
           y: containerPosition(c).y,
-          draggable: true,
+          // draggable: true, //拖拽功能暂时关闭
           name: c.id
         }"
         @dragend="evt => onContainerDragEnd(c, evt)"
       >
+        <!-- 箱子 -->
         <Rect
           :config="{
             x: 0,
@@ -355,50 +377,64 @@ function bayFooterPillWidth(stackNum: number) {
             width: boxW,
             height: boxH,
             cornerRadius: m.cornerRadius,
-            stroke: containerStroke(c),
+            stroke: containerStroke(c), //TODO: 根据状态判断颜色
             strokeWidth: c.in_operation ? 2 : 1,
             fill: '#ffffff'
           }"
         />
+        <!-- 作业顺序号 -->
         <Rect
           v-if="c.work_seq != null"
           :config="{
-            x: boxW - 20,
-            y: 1,
-            width: 18,
-            height: 16,
-            cornerRadius: 8,
-            fill: '#fbbf24',
+            x: boxW - workSeqBadgeWidth(c.work_seq) - 4,
+            y: 4,
+            width: workSeqBadgeWidth(c.work_seq),
+            height: 14,
+            cornerRadius: 7,
+            fill: 'rgba(245, 158, 11, 0.32)',
             stroke: '#f59e0b',
             strokeWidth: 1
           }"
         />
+
         <Text
           v-if="c.work_seq != null"
           :config="{
-            x: boxW - 20,
-            y: 1,
-            width: 18,
-            height: 16,
+            x: boxW - workSeqBadgeWidth(c.work_seq) - 4,
+            y: 4,
+            width: workSeqBadgeWidth(c.work_seq),
+            height: 14,
             align: 'center',
             verticalAlign: 'middle',
             text: String(c.work_seq),
-            fontSize: 10,
+            fontSize: 9,
             fontStyle: 'bold',
             fontFamily: m.fontFamily,
-            fill: '#111827'
+            fill: '#7c2d12'
           }"
         />
         <Text
           :config="{
             x: 4,
-            y: 5,
+            y: 8,
             width: boxW - 8,
-            text: shortNo(c.container_no),
-            fontSize: 9,
+            text: containerNoParts(c.container_no).owner,
+            fontSize: 8,
             fontStyle: 'bold',
             fontFamily: m.fontFamily,
             fill: '#0f172a'
+          }"
+        />
+        <Text
+          :config="{
+            x: 4,
+            y: 24,
+            width: boxW - 8,
+            text: containerNoParts(c.container_no).serial,
+            fontSize: 8,
+            fontStyle: 'bold',
+            fontFamily: m.fontFamily,
+            fill: '#334155'
           }"
         />
         <Rect
@@ -416,12 +452,12 @@ function bayFooterPillWidth(stackNum: number) {
             x: 4,
             y: boxH - 17,
             width: Math.min(36, Math.max(26, boxW - 28)),
-            height: 14,
+            height: 12,
             align: 'center',
             verticalAlign: 'middle',
             text: c.iso,
             fontSize: 8,
-            fontStyle: 'bold',
+            // fontStyle: 'bold',
             fontFamily: m.fontFamily,
             fill: '#ffffff'
           }"

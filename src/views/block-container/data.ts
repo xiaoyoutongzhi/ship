@@ -1,50 +1,50 @@
-// 1. 堆场贝结构，紧凑型数据结构【使用紧凑型数据结构完成堆场静态初始化。】
 
-const data: any = [
-  {
-    terminal_code: "DCT",
-    yard_lane_no: "A01", //栏号(街区)
-    stack_num: 6, //列数
-    tier_num: 5, //层数
-    bay_way: "D", //贝方向
-    row_way: "D", //列方向
-    x_coord: 663, //基点X轴坐标
-    y_coord: 40, //基点Y轴坐标
-    max_trucks: 14, //最大拖车数量
-    bays: [1, 3, 5, 7, 9, 11, 13, 15]
-  },
-  {
-    yard_lane_no: "A03",
-    terminal_code: "DCT",
-    bay_num: 42,
-    min_bay_no: 1,
-    max_bay_no: 83,
-    stack_num: 7,
-    tier_num: 6,
-    bay_way: "D",
-    row_way: "D",
-    x_coord: 663,
-    y_coord: 71,
-    max_trucks: 14
-  }
-];
+// - **接口地址**：`/yardStructure/upsert/list`
+// - **请求方式**：`POST`
+// - **提供方**：PORT
+// - **返回格式**：JSON
 
-// // 2.堆场贝结构，宽松型数据结构。
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const data1: any = [
-  {
-    yard_lane_no: "A01",
-    terminal_code: "DCT",
-    bay_num: 42,
-    min_bay_no: 1,
-    max_bay_no: 83,
-    stack_num: 6,
-    tier_num: 5,
-    bay_way: "D",
-    row_way: "D",
-    x_coord: 663,
-    y_coord: 40,
-    max_trucks: 14
-  }
-];
-export default data;
+// ### 请求头
+// | 参数名 | 类型 | 必填 | 说明 |
+// |--------|------|------|------|
+// | Content-Type | String | 是 | application/json |
+
+// ### 请求体（Body）
+// 无需传递任何请求体参数，直接调用即可。
+const data = {
+  "code": 0, // 状态码：0-成功，非0-失败
+  "msg": "success", // 响应提示信息
+  "detailMsg": null, // 详细提示信息
+  "data": [ // 堆场结构列表
+    {
+      "yardLaneNo": "A01", // 栏号
+      "terminalCode": "YANTIAN", // 港区
+      "bayNum": 40, // 贝数
+      "minBayNo": 1, // 最小贝号
+      "maxBayNo": 40, // 最大贝号
+      "stackNum": 6, // 列数
+      "tierNum": 5, // 层数
+      "bayWay": "A", // 贝方向：A-从小到大，D-从大到小
+      "rowWay": "A", // 列方向：A-从小到大，D-从大到小
+      "x": 113.456, // 基点X轴坐标
+      "y": 22.123, // 基点Y轴坐标
+      "maxTrucks": 20, // 最大拖车数量
+      "bays": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] // 贝号列表
+    },
+    {
+      "yardLaneNo": "B02", // 栏号
+      "terminalCode": "YANTIAN", // 港区
+      "bayNum": 30, // 贝数
+      "minBayNo": 1, // 最小贝号
+      "maxBayNo": 30, // 最大贝号
+      "stackNum": 5, // 列数
+      "tierNum": 4, // 层数
+      "bayWay": "D", // 贝方向：A-从小到大，D-从大到小
+      "rowWay": "D", // 列方向：A-从小到大，D-从大到小
+      "x": 113.789, // 基点X轴坐标
+      "y": 22.456, // 基点Y轴坐标
+      "maxTrucks": 15, // 最大拖车数量
+      "bays": [1, 3, 5, 7, 9, 11, 13, 15] // 贝号列表
+    }
+  ]
+}

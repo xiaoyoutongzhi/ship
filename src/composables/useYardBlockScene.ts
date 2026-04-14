@@ -27,24 +27,24 @@ export function useYardBlockScene(
   );
   /** 当前在页面上展示的栏号；默认全选 */
   const selectedLanes = ref<Set<string>>(
-    new Set(blocks.value.map(b => b.yard_lane_no))
+    new Set(blocks.value.map(block => block.yard_lane_no))
   );
   /** 贝面缩放百分比（60–140 等与工具栏一致） */
   const scalePercent = ref(100);
 
   /** 仅包含已勾选栏的街区，用于纵向渲染多行画布 */
   const visibleBlocks = computed(() =>
-    blocks.value.filter(b => selectedLanes.value.has(b.yard_lane_no))
+    blocks.value.filter(block => selectedLanes.value.has(block.yard_lane_no))
   );
 
   /** 仅包含已勾选栏上的箱，再按栏号分给各 Konva 舞台 */
   const visibleContainers = computed(() =>
-    containers.value.filter(c => selectedLanes.value.has(c.yard_lane_no))
+    containers.value.filter(container => selectedLanes.value.has(container.yard_lane_no))
   );
 
   /** 工具栏「街区」芯片选项：所有栏号去重排序 */
   const laneOptions = computed(() =>
-    [...new Set(blocks.value.map(b => b.yard_lane_no))].sort()
+    [...new Set(blocks.value.map(block => block.yard_lane_no))].sort()
   );
 
   /** 箱总数（不按栏筛选），用于页头统计文案 */

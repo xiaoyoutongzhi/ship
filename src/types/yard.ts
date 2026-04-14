@@ -47,7 +47,7 @@ export interface YardContainerModel {
   type_code: string;
   iso: string;
   weight_ton: string;
-  work_seq: number | null;
+  work_seq: number;
   in_operation?: boolean;
 }
 

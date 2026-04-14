@@ -13,7 +13,7 @@ defineProps<{
     <div class="yard-legend__items">
       <div class="item">
         <span class="swatch swatch--all" />
-        <span>所有集装箱</span>
+        <span>有集装箱</span>
       </div>
       <div class="item">
         <span class="swatch swatch--empty" />
@@ -21,11 +21,11 @@ defineProps<{
       </div>
       <div class="item">
         <span class="swatch swatch--ft40" />
-        <span>40尺集装箱</span>
+        <span>40尺跨贝箱</span>
       </div>
       <div class="item">
         <span class="swatch swatch--work" />
-        <span>运作中装卸作业的集装箱</span>
+        <span>选中岸桥作业的集装箱</span>
       </div>
       <div class="item">
         <span class="badge">1</span>
@@ -69,7 +69,9 @@ defineProps<{
   border-color: #3b82f6;
 }
 .swatch--ft40 {
-  width: 28px;
+  width: 18px;
+  background: #e6f7ff;
+  border: 1px solid #2c7cb6;
 }
 .swatch--work {
   border-color: #f59e0b;

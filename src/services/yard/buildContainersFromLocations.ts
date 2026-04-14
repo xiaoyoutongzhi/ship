@@ -9,7 +9,8 @@ export function buildContainersFromLocations(
   return locations.map((loc, idx) =>
     buildMockContainerFromLocation(loc, {
       in_operation: markOp && idx === 0,
-      work_seq: markOp && idx === 0 ? 3 : undefined
+      // 作业顺序号为箱信息必填字段，按列表顺序连续生成
+      work_seq: idx + 1
     })
   );
 }

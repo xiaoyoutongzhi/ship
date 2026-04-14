@@ -12,7 +12,7 @@ import { tierToRowIndex } from "./cellSlots";
 const GRID_AREA_FILL = "#eef6fc"; //格区填充颜色
 const CELL_DASH_STROKE = "#8eb4df"; //格子虚线颜色
 const CELL_DASH = [4, 3] as const; //格子虚线样式
-const ROW_SEPARATOR = "#e5989f"; //行间红线颜色
+const ROW_SEPARATOR = "#b7cadf"; //行间分隔线：柔和蓝灰，更贴合整体
 const HEADER_GRID_LINE = "#d1dce8"; //顶部红线颜色
 /** 行间红线相对格区左右内缩 */
 const ROW_LINE_X_INSET = 0;
@@ -58,7 +58,7 @@ export function paintBayCellGridSlots(
   const gx0 = label;
   const gx1 = label + gw;
   const gy1 = sh + gh;
-  const lineLeft = gx0 + ROW_LINE_X_INSET;
+  const lineLeft = 0 + ROW_LINE_X_INSET;
   const lineRight = gx1 - ROW_LINE_X_INSET;
 
   context.save();

@@ -70,6 +70,9 @@ export function blockBoundingSize(block: YardBlockModel, metrics = YARD_GRID_MET
 }
 
 export function computeStageBounds(blocks: YardBlockModel[], metrics = YARD_GRID_METRICS) {
+  // 舞台外扩边距：用于避免描边裁切，同时不产生明显底部留白
+  const STAGE_PAD_X = 16;
+  const STAGE_PAD_Y = 10;
   let maxR = 0;
   let maxB = 0;
   blocks.forEach(b => {
@@ -78,7 +81,7 @@ export function computeStageBounds(blocks: YardBlockModel[], metrics = YARD_GRID
     maxB = Math.max(maxB, b.y_coord + height);
   });
   return {
-    width: Math.ceil(maxR + 80),
-    height: Math.ceil(maxB + 80)
+    width: Math.ceil(maxR + STAGE_PAD_X),
+    height: Math.ceil(maxB + STAGE_PAD_Y)
   };
 }

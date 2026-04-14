@@ -34,7 +34,6 @@ const {
   /** 拖拽松开后由子组件上报，写回对应箱的贝/列/层 */
   commitContainerPosition
 } = scene;
-console.log(visibleBlocks.value);
 
 /** 工具栏缩放滑块变更时同步到场景 */
 function onScalePercent(v: number) {
@@ -118,11 +117,11 @@ function toggleFullscreen() {
   min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
-  padding: 12px;
+  padding: 10px 12px 8px;
   background: #f0f2f5;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 8px;
 }
 .yard-lane-row {
   flex: 0 0 auto;
@@ -134,5 +133,30 @@ function toggleFullscreen() {
   width: 100%;
   max-width: 100%;
   line-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: #b7c6d8 #e6edf4;
+}
+
+.yard-page__canvas::-webkit-scrollbar,
+.yard-lane-row__scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.yard-page__canvas::-webkit-scrollbar-track,
+.yard-lane-row__scroll::-webkit-scrollbar-track {
+  background: #e6edf4;
+  border-radius: 999px;
+}
+
+.yard-page__canvas::-webkit-scrollbar-thumb,
+.yard-lane-row__scroll::-webkit-scrollbar-thumb {
+  background: #b7c6d8;
+  border-radius: 999px;
+}
+
+.yard-page__canvas::-webkit-scrollbar-thumb:hover,
+.yard-lane-row__scroll::-webkit-scrollbar-thumb:hover {
+  background: #9fb2c9;
 }
 </style>

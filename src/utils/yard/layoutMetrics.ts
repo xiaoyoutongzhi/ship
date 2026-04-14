@@ -3,8 +3,8 @@ export const YARD_GRID_METRICS = {
   /** 左侧「层」号列 */
   labelColWidth: 30,
   /** 单格内容区（竖向长格） */
-  cellWidth: 56,
-  cellHeight: 76,
+  cellWidth: 63,
+  cellHeight: 80,
   /** 列缝 / 行缝（虚线走在缝中心，略加大更易对齐设计图） */
   cellGapX: 5,
   cellGapY: 5,
