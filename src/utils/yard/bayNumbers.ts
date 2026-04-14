@@ -1,7 +1,7 @@
-import type { YardStructureDto } from "@/types/yard";
+import type { YardBlockModel } from "@/types/yard";
 
 /** 从宽松结构解析贝位序号列表 */
-export function resolveBayNumbers(yard: YardStructureDto): number[] {
+export function resolveBayNumbers(yard: YardBlockModel): number[] {
   if (yard.bays?.length) {
     return [...yard.bays].sort((a, b) => a - b);
   }

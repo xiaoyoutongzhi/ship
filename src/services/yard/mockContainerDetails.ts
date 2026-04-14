@@ -1,7 +1,6 @@
 import type { CntrLocationDto, YardContainerModel } from "@/types/yard";
 
 const prefixes = ["MRSU", "MSCU", "CMAU", "COSU", "FANU", "TEMU"] as const;
-const types = ["GP", "HC", "RF"] as const;
 
 let seq = 1;
 
@@ -16,7 +15,7 @@ export function buildMockContainerFromLocation(
   const prefix = pick(prefixes);
   const body = String(1_000_000 + Math.floor(Math.random() * 8_000_000));
   const size_ft: 20 | 40 = Math.random() > 0.35 ? 20 : 40;
-  const t = pick(types);
+  const t = "GP";
   const iso = `${size_ft}${t}`;
   const weight = (Math.random() * 22 + 6).toFixed(1);
   const id = `cntr-${loc.yard_lane_no}-${loc.bay_start_num}-${loc.stack_num}-${loc.tier_num}-${seq++}`;

@@ -18,7 +18,7 @@ export function useYardBlockScene(
 ) {
   /** 各栏街区模型（含贝位、层列等），由结构 DTO 派生 */
   const blocks = ref<YardBlockModel[]>(
-    assignVerticalLaneStack(structure).map(toYardBlockModel)
+    assignVerticalLaneStack(structure.map(toYardBlockModel))
   );
 
   /** 全量箱模型，由位置 DTO 派生 */

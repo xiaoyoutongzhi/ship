@@ -175,7 +175,15 @@ function containerGroupKey(c: YardContainerModel) {
 /** 箱描边色：作业中强调色，否则默认蓝 */
 function containerStroke(c: YardContainerModel) {
   if (c.in_operation) return "#f59e0b";
+  if (c.size_ft === 40) return "#d4a72c";
   return "#3b82f6";
+}
+
+/** 箱底色：按尺寸区分 20/40 尺，作业中维持白底凸显描边 */
+function containerFill(c: YardContainerModel) {
+  if (c.in_operation) return "#ffffff";
+  if (c.size_ft === 40) return "#e6f7ff";
+  return "#eef6ff";
 }
 
 /** 箱号过长时中间省略，适配小格宽度 */
@@ -379,7 +387,7 @@ function bayFooterPillWidth(stackNum: number) {
             cornerRadius: m.cornerRadius,
             stroke: containerStroke(c), //TODO: 根据状态判断颜色
             strokeWidth: c.in_operation ? 2 : 1,
-            fill: '#ffffff'
+            fill: containerFill(c)
           }"
         />
         <!-- 作业顺序号 -->

@@ -58,7 +58,7 @@ function toggleFullscreen() {
     <!-- 顶栏：标题与箱量统计 -->
     <YardScreenHeader
       title="堆场街区视图"
-      subtitle="街区"
+      subtitle="行: 01-06 | 层: 01-05 (顶层在上) | 同一贝最多2个岸桥"
       :stat-text="`${totalContainers} 个集装箱`"
     />
 
