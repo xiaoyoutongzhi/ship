@@ -1,7 +1,7 @@
 /** 纯布局常量：与 Konva 解耦，便于单测与复用 */
 export const YARD_GRID_METRICS = {
   /** 左侧「层」号列 */
-  labelColWidth: 30,
+  labelColWidth: 40,
   /** 单格内容区（竖向长格） */
   cellWidth: 63,
   cellHeight: 80,

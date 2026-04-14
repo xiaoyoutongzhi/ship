@@ -26,6 +26,10 @@ const emit = defineEmits<{
 const containerNo = ref("");
 /** 贝号搜索（占位，未接过滤逻辑） */
 const bayNo = ref("");
+/** 筛选条件类型（占位，未接过滤逻辑） */
+const filterType = ref("size");
+/** 筛选关键字（占位，未接过滤逻辑） */
+const filterKeyword = ref("");
 
 const craneList = props.cranes?.length
   ? props.cranes
@@ -84,21 +88,42 @@ function isLaneActive(lane: string) {
     </div>
 
     <div class="yard-toolbar__row yard-toolbar__row--secondary">
-      <el-input
-        v-model="containerNo"
-        clearable
-        placeholder="箱号搜索"
-        class="yard-toolbar__input"
-      />
-      <el-input
-        v-model="bayNo"
-        clearable
-        placeholder="贝号"
-        class="yard-toolbar__input yard-toolbar__input--narrow"
-      />
-      <el-select placeholder="筛选条件" class="yard-toolbar__select" disabled>
-        <el-option label="（示例）" value="demo" />
-      </el-select>
+      <div class="yard-toolbar__field">
+        <span class="yard-toolbar__field-label">箱号搜索</span>
+        <el-input
+          v-model="containerNo"
+          clearable
+          placeholder="箱号关键字"
+          class="yard-toolbar__input yard-toolbar__input--wide"
+        />
+      </div>
+
+      <div class="yard-toolbar__field">
+        <span class="yard-toolbar__field-label">贝号</span>
+        <el-input
+          v-model="bayNo"
+          clearable
+          placeholder="贝号"
+          class="yard-toolbar__input yard-toolbar__input--narrow"
+        />
+      </div>
+
+      <div class="yard-toolbar__field">
+        <span class="yard-toolbar__field-label">筛选条件</span>
+        <el-select v-model="filterType" class="yard-toolbar__select">
+          <el-option label="尺寸" value="size" />
+          <el-option label="港口" value="port" />
+          <el-option label="重量" value="weight" />
+          <el-option label="类型" value="type" />
+        </el-select>
+        <el-input
+          v-model="filterKeyword"
+          clearable
+          placeholder="输入关键字"
+          class="yard-toolbar__input"
+        />
+      </div>
+
       <div class="yard-toolbar__zoom">
         <span class="yard-toolbar__label">贝面缩放</span>
         <input
@@ -140,6 +165,8 @@ function isLaneActive(lane: string) {
 }
 .yard-toolbar__row--secondary {
   align-items: center;
+  gap: 10px 12px;
+  padding-top: 2px;
 }
 .yard-toolbar__group {
   display: flex;
@@ -170,23 +197,47 @@ function isLaneActive(lane: string) {
   color: #fff;
 }
 .yard-toolbar__input {
-  width: 200px;
+  width: 160px;
+}
+.yard-toolbar__input--wide {
+  width: 180px;
 }
 .yard-toolbar__input--narrow {
-  width: 120px;
+  width: 100px;
 }
 .yard-toolbar__select {
-  width: 140px;
+  width: 92px;
+}
+.yard-toolbar__field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+}
+.yard-toolbar__field-label {
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
 }
 .yard-toolbar__zoom {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-left: auto;
+  padding-left: 8px;
+  border-left: 1px solid #e2e8f0;
 }
 .yard-toolbar__zoom-value {
   width: 44px;
   font-size: 12px;
   color: #334155;
+}
+@media (max-width: 1440px) {
+  .yard-toolbar__zoom {
+    margin-left: 0;
+    border-left: none;
+    padding-left: 0;
+  }
 }
 </style>

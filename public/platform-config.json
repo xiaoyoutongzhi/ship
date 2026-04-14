@@ -1,6 +1,6 @@
 {
   "Version": "6.2.0",
-  "Title": "PureAdmin",
+  "Title": "Admin",
   "FixedHeader": true,
   "HiddenSideBar": false,
   "MultiTagsCache": false,
@@ -12,8 +12,8 @@
   "OverallStyle": "light",
   "Grey": false,
   "Weak": false,
-  "HideTabs": false,
-  "HideFooter": false,
+  "HideTabs": true,
+  "HideFooter": true,
   "Stretch": false,
   "SidebarStatus": true,
   "EpThemeColor": "#409EFF",
