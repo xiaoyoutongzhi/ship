@@ -99,8 +99,9 @@ const stageConfig = computed(() => {
   const s = scaleForStage.value / 100;
   const { width, height } = logicalBounds.value;
   return {
-    width,
-    height,
+    // 放大时同步扩大舞台尺寸，避免内容被 Stage 边界裁切
+    width: Math.ceil(width * s),
+    height: Math.ceil(height * s),
     scaleX: s,
     scaleY: s
   };
@@ -139,12 +140,17 @@ function containerPosition(c: YardContainerModel) {
   return { x: x + pad, y: y + pad };
 }
 
-/** 贝位底部状态文案（演示用 mock，非真实业务） */
-function mockBayStatus(bayNo: number) {
-  if (bayNo % 13 === 0) return "空";
-  const a = (bayNo % 7) + 1;
-  const b = ((bayNo + 2) % 7) + 1;
-  return `QC${a}, QC${b}`;
+/** 贝位底部岸桥文案：同一贝最多 2 个岸桥；无箱则留空 */
+function bayCraneStatus(bayNo: number) {
+  const list = props.containers.filter(c => c.bay_no === bayNo);
+  if (!list.length) return "空";
+  const cranes = new Set<string>();
+  for (const c of list) {
+    const qcNo = ((c.work_seq - 1) % 7) + 1;
+    cranes.add(`QC${qcNo}`);
+    if (cranes.size >= 2) break;
+  }
+  return [...cranes].join(", ");
 }
 
 /** 拖拽结束：吸附最近合法格槽，向父组件提交新箱位并把节点移回格内 */
@@ -174,16 +180,13 @@ function containerGroupKey(c: YardContainerModel) {
 
 /** 箱描边色：作业中强调色，否则默认蓝 */
 function containerStroke(c: YardContainerModel) {
-  if (c.in_operation) return "#f59e0b";
-  if (c.size_ft === 40) return "#d4a72c";
   return "#3b82f6";
 }
 
 /** 箱底色：按尺寸区分 20/40 尺，作业中维持白底凸显描边 */
 function containerFill(c: YardContainerModel) {
-  if (c.in_operation) return "#ffffff";
   if (c.size_ft === 40) return "#e6f7ff";
-  return "#eef6ff";
+  return "#f8fafc";
 }
 
 /** 箱号过长时中间省略，适配小格宽度 */
@@ -347,7 +350,7 @@ function bayFooterPillWidth(stackNum: number) {
           }"
         />
 
-        <!-- 底部吊桥文字 -->
+        <!-- 底部岸桥文字 -->
         <Text
           :config="{
             x: m.labelColWidth,
@@ -355,7 +358,7 @@ function bayFooterPillWidth(stackNum: number) {
               m.stackHeaderHeight + gridBodyHeight(localBlock.tier_num, m) + 38,
             width: gridBodyWidth(localBlock.stack_num, m),
             align: 'center',
-            text: mockBayStatus(bayNo),
+            text: bayCraneStatus(bayNo),
             fontSize: 10,
             fontFamily: m.fontFamily,
             fill: '#e07a6e'

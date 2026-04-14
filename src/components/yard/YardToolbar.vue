@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
- * 堆场街区页工具条：栏筛选、吊桥演示多选、搜索占位、贝面缩放与全屏。
- * 吊桥与箱号/贝号筛选为 UI 占位，除缩放与全屏外未与父级数据联动。
+ * 堆场街区页工具条：栏筛选、岸桥演示多选、搜索占位、贝面缩放与全屏。
+ * 岸桥与箱号/贝号筛选为 UI 占位，除缩放与全屏外未与父级数据联动。
  */
 import { ref } from "vue";
 
@@ -12,7 +12,7 @@ const props = defineProps<{
   selectedLanes: Set<string>;
   /** 贝面缩放百分比 */
   scalePercent: number;
-  /** 可选：自定义吊桥编号列表，缺省为 QC1–QC7 */
+  /** 可选：自定义岸桥编号列表，缺省为 QC1–QC7 */
   cranes?: string[];
 }>();
 
@@ -30,15 +30,14 @@ const bayNo = ref("");
 const craneList = props.cranes?.length
   ? props.cranes
   : ["QC1", "QC2", "QC3", "QC4", "QC5", "QC6", "QC7"];
-/** 当前高亮的吊桥芯片，仅本地 UI 状态 */
-const activeCranes = ref<Set<string>>(new Set(craneList));
+/** 当前高亮的岸桥芯片，仅本地 UI 状态（默认全不选） */
+const activeCranes = ref<Set<string>>(new Set());
 
-/** 切换吊桥芯片选中；不允许全部取消 */
+/** 切换岸桥芯片选中 */
 function toggleCrane(q: string) {
   const n = new Set(activeCranes.value);
   if (n.has(q)) n.delete(q);
   else n.add(q);
-  if (n.size === 0) n.add(q);
   activeCranes.value = n;
 }
 
@@ -68,7 +67,7 @@ function isLaneActive(lane: string) {
       </div>
 
       <div class="yard-toolbar__group">
-        <span class="yard-toolbar__label">吊桥</span>
+        <span class="yard-toolbar__label">岸桥</span>
         <div class="yard-toolbar__chips">
           <button
             v-for="q in craneList"

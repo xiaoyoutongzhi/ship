@@ -5,22 +5,6 @@ export const cntrLocationsMock: CntrLocationDto[] = [
   {
     terminal_code: "DCT",
     yard_lane_no: "A01",
-    bay_start_num: 1,
-    bay_end_num: 1,
-    stack_num: 1,
-    tier_num: 1
-  },
-  {
-    terminal_code: "DCT",
-    yard_lane_no: "A01",
-    bay_start_num: 1,
-    bay_end_num: 1,
-    stack_num: 2,
-    tier_num: 2
-  },
-  {
-    terminal_code: "DCT",
-    yard_lane_no: "A01",
     bay_start_num: 3,
     bay_end_num: 3,
     stack_num: 3,
@@ -113,22 +97,6 @@ export const cntrLocationsMock: CntrLocationDto[] = [
     bay_end_num: 15,
     stack_num: 4,
     tier_num: 1
-  },
-  {
-    terminal_code: "DCT",
-    yard_lane_no: "A03",
-    bay_start_num: 1,
-    bay_end_num: 1,
-    stack_num: 2,
-    tier_num: 1
-  },
-  {
-    terminal_code: "DCT",
-    yard_lane_no: "A03",
-    bay_start_num: 1,
-    bay_end_num: 1,
-    stack_num: 4,
-    tier_num: 3
   },
   {
     terminal_code: "DCT",

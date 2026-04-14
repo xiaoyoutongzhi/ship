@@ -6,12 +6,18 @@ export function buildContainersFromLocations(
   options?: { markFirstInOperation?: boolean }
 ): YardContainerModel[] {
   const markOp = options?.markFirstInOperation ?? true;
+  const baySeqMap = new Map<string, number>();
   return locations.map((loc, idx) =>
-    buildMockContainerFromLocation(loc, {
-      in_operation: markOp && idx === 0,
-      // 作业顺序号为箱信息必填字段，按列表顺序连续生成
-      work_seq: idx + 1
-    })
+    {
+      const key = `${loc.yard_lane_no}-${loc.bay_start_num}`;
+      const next = (baySeqMap.get(key) ?? 0) + 1;
+      baySeqMap.set(key, next);
+      return buildMockContainerFromLocation(loc, {
+        in_operation: markOp && idx === 0,
+        // 作业顺序号按“每个贝”独立计数，从 1 开始
+        work_seq: next
+      });
+    }
   );
 }
 
