@@ -140,6 +140,21 @@ function containerPosition(c: YardContainerModel) {
   return { x: x + pad, y: y + pad };
 }
 
+/**
+ * 拖拽等事件须写在 config 的 on* 里，不能写模板 @dragend：
+ * vue-konva 的 Group 根是 slot 片段，未声明 emits 时 Vue 会报 extraneous listener。
+ */
+function containerGroupConfig(c: YardContainerModel) {
+  const { x, y } = containerPosition(c);
+  return {
+    x,
+    y,
+    // draggable: true, 拖拽功能暂时关闭
+    name: c.id,
+    onDragend: (evt: any) => onContainerDragEnd(c, evt)
+  };
+}
+
 /** 贝位底部岸桥文案：同一贝最多 2 个岸桥；无箱则留空 */
 function bayCraneStatus(bayNo: number) {
   const list = props.containers.filter(c => c.bay_no === bayNo);
@@ -227,14 +242,13 @@ function bayFooterPillWidth(stackNum: number) {
         :key="`${localBlock.yard_lane_no}-${bayNo}`"
         :config="{ ...bayOrigin(localBlock, bayIndex) }"
       >
+        <!-- 贝底板：仅填充；描边见组末尾，避免顶栏等子层盖住圆角 stroke -->
         <Rect
           :config="{
             x: 0,
             y: 0,
             width: bayInnerWidth(localBlock.stack_num, m),
             height: bayInnerHeight(localBlock.tier_num, m),
-            stroke: '#bdd7ec',
-            strokeWidth: 1,
             cornerRadius: 14,
             fill: '#eef8fc'
           }"
@@ -364,6 +378,20 @@ function bayFooterPillWidth(stackNum: number) {
             fill: '#e07a6e'
           }"
         />
+
+        <Rect
+          :config="{
+            x: 0,
+            y: 0,
+            width: bayInnerWidth(localBlock.stack_num, m),
+            height: bayInnerHeight(localBlock.tier_num, m),
+            cornerRadius: 14,
+            fillEnabled: false,
+            stroke: '#bdd7ec',
+            strokeWidth: 1,
+            listening: false
+          }"
+        />
       </Group>
     </Layer>
 
@@ -372,13 +400,7 @@ function bayFooterPillWidth(stackNum: number) {
       <Group
         v-for="c in containers"
         :key="containerGroupKey(c)"
-        :config="{
-          x: containerPosition(c).x,
-          y: containerPosition(c).y,
-          // draggable: true, //拖拽功能暂时关闭
-          name: c.id
-        }"
-        @dragend="evt => onContainerDragEnd(c, evt)"
+        :config="containerGroupConfig(c)"
       >
         <!-- 箱子 -->
         <Rect
