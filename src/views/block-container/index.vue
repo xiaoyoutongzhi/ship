@@ -106,7 +106,7 @@ function toggleFullscreen() {
 .yard-page {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 120px);
+  height: calc(100vh - 58px);
   min-height: 520px;
   background: #fff;
   border-radius: 12px;
