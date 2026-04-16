@@ -3,7 +3,7 @@
  * 单栏街区 Konva 舞台：绘制贝格网、箱块；拖拽结束后吸附最近格槽并 `container-commit` 上报。
  */
 import { computed, ref, watch } from "vue";
-import { watchThrottled } from "@vueuse/core";
+import { useElementSize, useScroll, watchThrottled } from "@vueuse/core";
 import type { Context } from "konva/lib/Context";
 import type { Shape } from "konva/lib/Shape";
 import {
@@ -62,6 +62,7 @@ const emit = defineEmits<{
 const m = YARD_GRID_METRICS;
 const strideX = cellStrideX(m);
 const strideY = cellStrideY(m);
+const HORIZONTAL_BAY_OVERSCAN = 2;
 /** 箱块比格槽小 2px：四边各留 1px，避免视觉过满 */
 const pad = 1;
 const boxW = m.cellWidth - pad * 2;
@@ -107,9 +108,82 @@ const stageConfig = computed(() => {
   };
 });
 
+/** 横向滚动容器：用于按视口裁剪贝与箱，避免全量渲染 */
+const scrollEl = ref<HTMLElement | null>(null);
+const { x: scrollLeft } = useScroll(scrollEl);
+const { width: viewportWidth } = useElementSize(scrollEl);
+
+const bayLogicalWidth = computed(
+  () => bayInnerWidth(localBlock.value.stack_num, m) + m.bayGap
+);
+const bayCount = computed(() => localBlock.value.bayNumbers.length);
+const scaleRatio = computed(() => Math.max(0.01, scaleForStage.value / 100));
+
+/** 根据横向滚动位置计算当前需要渲染的贝范围（含 overscan） */
+const visibleBayRange = computed(() => {
+  const count = bayCount.value;
+  if (!count) return { start: 0, end: -1 };
+  const logicalLeft = scrollLeft.value / scaleRatio.value;
+  const logicalRight =
+    logicalLeft +
+    (viewportWidth.value > 0 ? viewportWidth.value / scaleRatio.value : 0);
+  const span = Math.max(1, bayLogicalWidth.value);
+  const start = Math.max(
+    0,
+    Math.floor(logicalLeft / span) - HORIZONTAL_BAY_OVERSCAN
+  );
+  const end = Math.min(
+    count - 1,
+    Math.ceil(logicalRight / span) + HORIZONTAL_BAY_OVERSCAN
+  );
+  return { start, end };
+});
+
+const visibleBayEntries = computed(() => {
+  const block = localBlock.value;
+  const { start, end } = visibleBayRange.value;
+  if (end < start) return [];
+  return block.bayNumbers.slice(start, end + 1).map((bayNo, idx) => ({
+    bayNo,
+    bayIndex: start + idx
+  }));
+});
+
+const visibleBaySet = computed(() => {
+  const set = new Set<number>();
+  for (const entry of visibleBayEntries.value) {
+    set.add(entry.bayNo);
+  }
+  return set;
+});
+
+/** 只渲染当前可视贝范围内的箱，显著减少 Konva 节点 */
+const visibleContainers = computed(() =>
+  props.containers.filter(c => visibleBaySet.value.has(c.bay_no))
+);
+
+/** 预计算贝位岸桥状态，避免模板内每贝重复 filter 容器 */
+const craneStatusByBay = computed(() => {
+  const map = new Map<number, string>();
+  const craneSetByBay = new Map<number, Set<string>>();
+  for (const c of props.containers) {
+    const bayNo = c.bay_no;
+    if (!visibleBaySet.value.has(bayNo)) continue;
+    const craneSet = craneSetByBay.get(bayNo) ?? new Set<string>();
+    const qcNo = ((c.work_seq - 1) % 7) + 1;
+    craneSet.add(`QC${qcNo}`);
+    craneSetByBay.set(bayNo, craneSet);
+  }
+  for (const entry of visibleBayEntries.value) {
+    const cranes = craneSetByBay.get(entry.bayNo);
+    map.set(entry.bayNo, cranes && cranes.size ? [...cranes].slice(0, 2).join(", ") : "空");
+  }
+  return map;
+});
+
 /** 箱列表布局指纹：任一箱位或箱号变化时用于触发 Konva 节点 key 更新 */
 const containerLayoutSignature = computed(() =>
-  props.containers
+  visibleContainers.value
     .map(
       c =>
         `${c.id}:${c.yard_lane_no}:${c.bay_no}:${c.stack_num}:${c.tier_num}:${c.container_no}`
@@ -157,15 +231,7 @@ function containerGroupConfig(c: YardContainerModel) {
 
 /** 贝位底部岸桥文案：同一贝最多 2 个岸桥；无箱则留空 */
 function bayCraneStatus(bayNo: number) {
-  const list = props.containers.filter(c => c.bay_no === bayNo);
-  if (!list.length) return "空";
-  const cranes = new Set<string>();
-  for (const c of list) {
-    const qcNo = ((c.work_seq - 1) % 7) + 1;
-    cranes.add(`QC${qcNo}`);
-    if (cranes.size >= 2) break;
-  }
-  return [...cranes].join(", ");
+  return craneStatusByBay.value.get(bayNo) ?? "空";
 }
 
 /** 拖拽结束：吸附最近合法格槽，向父组件提交新箱位并把节点移回格内 */
@@ -235,12 +301,13 @@ function bayFooterPillWidth(stackNum: number) {
 </script>
 
 <template>
-  <Stage :config="stageConfig">
+  <div ref="scrollEl" class="yard-lane-row__scroll">
+    <Stage :config="stageConfig">
     <Layer :config="{ listening: true }">
       <Group
-        v-for="(bayNo, bayIndex) in localBlock.bayNumbers"
-        :key="`${localBlock.yard_lane_no}-${bayNo}`"
-        :config="{ ...bayOrigin(localBlock, bayIndex) }"
+        v-for="entry in visibleBayEntries"
+        :key="`${localBlock.yard_lane_no}-${entry.bayNo}`"
+        :config="{ ...bayOrigin(localBlock, entry.bayIndex) }"
       >
         <!-- 贝底板：仅填充；描边见组末尾，避免顶栏等子层盖住圆角 stroke -->
         <Rect
@@ -356,7 +423,7 @@ function bayFooterPillWidth(stackNum: number) {
               m.stackHeaderHeight + gridBodyHeight(localBlock.tier_num, m) + 14,
             width: gridBodyWidth(localBlock.stack_num, m),
             align: 'center',
-            text: `${localBlock.yard_lane_no}-${String(bayNo).padStart(2, '0')}`,
+            text: `${localBlock.yard_lane_no}-${String(entry.bayNo).padStart(2, '0')}`,
             fontSize: 12,
             fontStyle: 'bold',
             fontFamily: m.fontFamily,
@@ -372,7 +439,7 @@ function bayFooterPillWidth(stackNum: number) {
               m.stackHeaderHeight + gridBodyHeight(localBlock.tier_num, m) + 38,
             width: gridBodyWidth(localBlock.stack_num, m),
             align: 'center',
-            text: bayCraneStatus(bayNo),
+            text: bayCraneStatus(entry.bayNo),
             fontSize: 10,
             fontFamily: m.fontFamily,
             fill: '#e07a6e'
@@ -398,7 +465,7 @@ function bayFooterPillWidth(stackNum: number) {
     <!-- 绘制箱子 -->
     <Layer>
       <Group
-        v-for="c in containers"
+        v-for="c in visibleContainers"
         :key="containerGroupKey(c)"
         :config="containerGroupConfig(c)"
       >
@@ -509,5 +576,18 @@ function bayFooterPillWidth(stackNum: number) {
         />
       </Group>
     </Layer>
-  </Stage>
+    </Stage>
+  </div>
 </template>
+
+<style scoped lang="scss">
+.yard-lane-row__scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  width: 100%;
+  max-width: 100%;
+  line-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: #b7c6d8 #e6edf4;
+}
+</style>
